@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Viaje de Kya</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            /* Level 1 - Grass World */
+            --grass-bg: #2ca52c;
+            --grass-lines: #238a23;
+            --grass-light: #44cc44;
+            
+            /* Level 2 - Submerged World */
+            --water-deep: #0a2540;
+            --water-mid: #1e3a5f;
+            --water-light: #2dd4bf;
+            --kelp-dark: #134e4a;
+            --kelp-light: #0f766e;
+            --fish-gold: #fcd34d;
+            
+            /* Universal */
+            --void: #020617;
+            --sky-top: #080c1d;
+            --accent: #fbbf24;
+            --gemini-purple: #8b5cf6;
+            --kya-white: #ffffff;
+            --kya-gray: #555555;
+            --kya-pink: #fda4af;
+            
+            /* Pastel Cute UI Colors */
+            --pastel-pink: #ffc8dd;
+            --pastel-purple: #d8b4fe;
+            --pastel-blue: #bfdbfe;
+            --pastel-green: #bbf7d0;
+            --pastel-yellow: #fef08a;
+            --pastel-peach: #fed7aa;
+            --ui-dark: #4a5568;
+            --ui-light: #f7fafc;
+            --shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; }
+
+        body {
+            background-color: var(--void);
+            color: white;
+            font-family: 'Fredoka', 'Press Start 2P', cursive;
+            overflow: hidden;
+        }
+
+        #game-viewport {
+            width: 100vw; height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: var(--sky-top);
+            transition: background 1s ease;
+            display: none;
+        }
+
+        #game-viewport.active {
+            display: block;
+        }
+
+        #game-viewport.level-2 {
+            background: linear-gradient(to bottom, #051f3e, #0a2540);
+        }
+
+        #world {
+            position: absolute;
+            width: 5000px; height: 5000px;
+            transition: transform 0.1s linear;
+        }
+
+        /* LEVEL 1 STYLES */
+        .island {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--grass-bg);
+            background-image: url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M2 10l4-4M10 2l-4 4M20 12l6 6M40 5l-8 8M55 10l5-5M15 30l10-10M45 25l8 8M5 45l12-12M30 40l6 6M58 50l-10 10M12 55l8-8M25 60l5-5' stroke='%23238a23'/%3E%3Cpath d='M8 15l4 4M35 8l6-6M50 15l-5 5M2 35l8-8M28 28l4 4M55 35l5 5M15 50l6-6M40 55l8-8' stroke='%2344cc44'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 64px 64px;
+            image-rendering: pixelated;
+            border: 60px solid #1a5c1a;
+            z-index: 0;
+        }
+
+        /* LEVEL 2 STYLES */
+        .ocean-floor {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--water-deep);
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%231e3a5f' stroke-width='2' opacity='0.4'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3Ccircle cx='60' cy='15' r='2'/%3E%3Ccircle cx='35' cy='45' r='2.5'/%3E%3Ccircle cx='70' cy='60' r='2'/%3E%3Ccircle cx='15' cy='65' r='3'/%3E%3Ccircle cx='50' cy='70' r='2'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 80px 80px;
+            border: 60px solid #051f3e;
+            z-index: 0;
+        }
+
+        .cave {
+            position: absolute;
+            width: 320px; height: 200px;
+            background-image: url('https://files.oaiusercontent.com/file-q4Vn6fHh87S2SndK970qf2?se=2024-10-24T15%3A54%3A18Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3Dimage_919a24.png&sig=3P7wR7iQWv892S6vH4v9W8E7S%2B2S7q9Z8e8y8S7q9Z8%3D');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: translate(-50%, -85%);
+            image-rendering: pixelated;
+            pointer-events: none;
+        }
+
+        .bush-container {
+            position: absolute;
+            width: 100px; height: 75px;
+            transform: translate(-50%, -80%);
+            transition: filter 0.5s ease;
+        }
+
+        .special-bush {
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+        }
+
+        .tree-container {
+            position: absolute;
+            width: 120px; height: 150px;
+            transform: translate(-50%, -90%);
+            pointer-events: none;
+        }
+
+        /* KELP (Level 2 plants) */
+        .kelp-container {
+            position: absolute;
+            width: 80px; height: 180px;
+            transform: translate(-50%, -90%);
+            pointer-events: none;
+        }
+
+        .kelp-container.special-kelp {
+            filter: drop-shadow(0 0 10px rgba(252, 211, 77, 0.6));
+        }
+
+        .kelp-sway {
+            animation: kelp-sway 3s infinite ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        @keyframes kelp-sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        /* ROCKS (Level 2) */
+        .rock-container {
+            position: absolute;
+            width: 100px; height: 80px;
+            transform: translate(-50%, -60%);
+            pointer-events: none;
+        }
+
+        /* AIR BUBBLE ZONES (Level 2) */
+        .air-bubble-zone {
+            position: absolute;
+            width: 300px; height: 300px;
+            transform: translate(-50%, -50%);
+            border: 3px dashed rgba(45, 212, 191, 0.4);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(45, 212, 191, 0.1), transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bubble-particle {
+            position: absolute;
+            width: 10px; height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: bubble-rise 4s infinite ease-in;
+        }
+
+        @keyframes bubble-rise {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(-200px) scale(1); opacity: 0; }
+        }
+
+        /* FLOATING PARTICLES (Level 2 ambient) */
+        .water-particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: rgba(45, 212, 191, 0.3);
+            border-radius: 50%;
+            animation: float-drift 8s infinite ease-in-out;
+        }
+
+        @keyframes float-drift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(20px, -30px); }
+            50% { transform: translate(-10px, -60px); }
+            75% { transform: translate(15px, -90px); }
+        }
+
+        .star-item {
+            position: absolute;
+            width: 35px; height: 35px;
+            transform: translate(-50%, -50%);
+            animation: float 2s infinite ease-in-out;
+        }
+
+        /* FISH (Level 2 collectible) */
+        .fish-item {
+            position: absolute;
+            width: 40px; height: 40px;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+
+        .fish-swimming {
+            animation: fish-swim 3s infinite ease-in-out;
+        }
+
+        @keyframes fish-swim {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) translateY(-8px) rotate(-5deg); }
+            50% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+            75% { transform: translate(-50%, -50%) translateY(8px) rotate(5deg); }
+        }
+
+        /* PORTAL STYLES */
+        #portal {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            display: none;
+            transform: translate(-50%, -50%);
+            z-index: 4000;
+        }
+
+        #portal.active {
+            display: block;
+            animation: portalAppear 2s ease-out;
+        }
+
+        @keyframes portalAppear {
+            from {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1) rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        .portal-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 4px solid;
+            animation: portalPulse 2s infinite ease-in-out;
+        }
+
+        .portal-ring:nth-child(1) {
+            width: 200px; height: 200px;
+            border-color: #fbbf24;
+            animation-delay: 0s;
+        }
+
+        .portal-ring:nth-child(2) {
+            width: 160px; height: 160px;
+            border-color: #8b5cf6;
+            animation-delay: 0.3s;
+            top: 20px; left: 20px;
+        }
+
+        .portal-ring:nth-child(3) {
+            width: 120px; height: 120px;
+            border-color: #ec4899;
+            animation-delay: 0.6s;
+            top: 40px; left: 40px;
+        }
+
+        .portal-center {
+            position: absolute;
+            width: 80px; height: 80px;
+            top: 60px; left: 60px;
+            background: radial-gradient(circle, #8b5cf6, #1e1b4b);
+            border-radius: 50%;
+            animation: portalSwirl 3s infinite linear;
+        }
+
+        @keyframes portalPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+        }
+
+        @keyframes portalSwirl {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* TRANSITION SCREEN */
+        #transition-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle, #8b5cf6, #020617);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        #transition-screen.active {
+            display: flex;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .transition-text {
+            font-size: 18px;
+            text-align: center;
+            padding: 0 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #player {
+            position: absolute;
+            width: 70px; height: 70px;
+            transform: translate(-50%, -85%);
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        #player.hiding {
+            opacity: 0.4;
+        }
+
+        #player.entering-portal {
+            animation: enterPortal 2s ease-in forwards;
+        }
+
+        #player.swimming {
+            animation: swim-bob 1.5s infinite ease-in-out;
+        }
+
+        @keyframes swim-bob {
+            0%, 100% { transform: translate(-50%, -85%) translateY(0); }
+            50% { transform: translate(-50%, -85%) translateY(-5px); }
+        }
+
+        @keyframes enterPortal {
+            0% {
+                transform: translate(-50%, -85%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -85%) scale(0) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* BUBBLE TRAIL for Kya underwater */
+        .kya-bubble {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: bubble-trail 1s ease-out forwards;
+        }
+
+        @keyframes bubble-trail {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(0.3) translateY(-40px); opacity: 0; }
+        }
+
+        /* OWL (Level 1 enemy) */
+        #enemy-owl {
+            position: absolute;
+            width: 120px; height: 80px;
+            display: none;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .owl-wing-l { animation: wing-flap 0.2s infinite alternate ease-in-out; transform-origin: right; }
+        .owl-wing-r { animation: wing-flap 0.2s infinite alternate-reverse ease-in-out; transform-origin: left; }
+
+        @keyframes wing-flap { from { transform: rotate(-15deg); } to { transform: rotate(15deg); } }
+
+        /* LIZARD (Level 2 enemy) - Now PLESIOSAURUS */
+        .lizard-enemy {
+            position: absolute;
+            width: 140px; height: 100px;
+            display: none;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .lizard-enemy.active {
+            display: block;
+        }
+
+        .lizard-alert {
+            animation: lizard-alert-pulse 0.5s ease-in-out;
+        }
+
+        @keyframes lizard-alert-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* Plesiosaurus flipper animations */
+        .plesiosaur-flipper-front-left {
+            animation: flipper-swim-left 1.2s infinite ease-in-out;
+            transform-origin: 50px 75px;
+        }
+
+        .plesiosaur-flipper-front-right {
+            animation: flipper-swim-right 1.2s infinite ease-in-out;
+            transform-origin: 70px 75px;
+        }
+
+        .plesiosaur-flipper-back {
+            animation: flipper-swim-back 1.5s infinite ease-in-out;
+            transform-origin: 25px 65px;
+        }
+
+        @keyframes flipper-swim-left {
+            0%, 100% { transform: rotate(20deg); }
+            50% { transform: rotate(-10deg); }
+        }
+
+        @keyframes flipper-swim-right {
+            0%, 100% { transform: rotate(-20deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        @keyframes flipper-swim-back {
+            0%, 100% { transform: rotate(-30deg); }
+            50% { transform: rotate(-50deg); }
+        }
+
+        #alert-ui {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+            z-index: 5001;
+            border: 2px solid white;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .kya-svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.4)); }
+        .walking #kya-leg-front { animation: leg-swing 0.15s infinite alternate; }
+        .walking #kya-leg-back { animation: leg-swing 0.15s infinite alternate-reverse; }
+        #kya-tail-group { transform-origin: 48px 45px; animation: wag-tail 1s infinite alternate ease-in-out; }
+
+        @keyframes wag-tail { from { transform: rotate(-10deg); } to { transform: rotate(15deg); } }
+        @keyframes leg-swing { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+        @keyframes float { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-10px); } }
+
+        #hud {
+            position: fixed; top: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid white;
+            padding: 12px 18px;
+            z-index: 5000;
+            font-size: 10px;
+            border-radius: 12px;
+        }
+
+        #dialog-box {
+            position: fixed; bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            width: 85%; max-width: 650px;
+            background: rgba(0,0,0,0.92);
+            border: 4px solid var(--accent);
+            padding: 25px; display: none; z-index: 5000;
+            font-size: 12px; line-height: 1.6;
+            border-radius: 16px;
+        }
+
+        #gemini-button {
+            position: fixed; bottom: 40px; right: 40px;
+            width: 65px; height: 65px;
+            background: var(--gemini-purple);
+            border: 4px solid white; border-radius: 50%;
+            color: white; font-size: 26px; cursor: pointer;
+            z-index: 5000; display: flex; align-items: center; justify-content: center;
+        }
+
+        #mobile-controls {
+            position: fixed; bottom: 20px; left: 20px;
+            display: none; z-index: 5000; gap: 10px;
+        }
+
+        #mobile-controls.visible {
+            display: grid !important;
+            grid-template-columns: repeat(3, 55px);
+        }
+
+        .d-btn { 
+            width: 55px; height: 55px; background: rgba(0,0,0,0.7);
+            border: 2px solid white; color: white; display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; font-size: 20px;
+            touch-action: none;
+        }
+
+        @media (hover: none) { #mobile-controls { display: grid; grid-template-columns: repeat(3, 55px); } }
+
+        /* ============================================
+           MENU SYSTEM STYLES
+           ============================================ */
+        
+        /* Main Menu */
+        #main-menu {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, var(--pastel-purple), var(--pastel-pink), var(--pastel-blue));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        #main-menu.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .menu-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 4px 4px 0 var(--pastel-purple),
+                         6px 6px 0 rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: title-float 3s infinite ease-in-out;
+        }
+
+        .menu-subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--ui-dark);
+            margin-bottom: 50px;
+            opacity: 0.8;
+        }
+
+        @keyframes title-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 350px;
+        }
+
+        .menu-btn {
+            background: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 25px;
+            font-family: 'Fredoka', cursive;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--ui-dark);
+            cursor: pointer;
+            box-shadow: 0 6px 0 var(--shadow),
+                        0 8px 20px var(--shadow);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 var(--shadow),
+                        0 12px 25px var(--shadow);
+        }
+
+        .menu-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--shadow),
+                        0 4px 10px var(--shadow);
+        }
+
+        .menu-btn.primary {
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-peach));
+            color: white;
+            font-size: 24px;
+        }
+
+        .menu-btn.secondary {
+            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-green));
+            color: white;
+        }
+
+        .menu-btn-icon {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        /* Pause Menu */
+        #pause-menu {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #pause-menu.active {
+            display: flex;
+        }
+
+        .pause-container {
+            background: linear-gradient(135deg, rgba(255, 200, 221, 0.95), rgba(216, 180, 254, 0.95));
+            padding: 40px 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .pause-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .pause-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 280px;
+        }
+
+        /* Level Select Menu */
+        #level-select-menu {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-green), var(--pastel-yellow));
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #level-select-menu.active {
+            display: flex;
+        }
+
+        .level-select-title {
+            font-size: 38px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 3px 3px 0 var(--pastel-blue),
+                         5px 5px 0 rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+        }
+
+        .level-cards-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        .level-card {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            width: 250px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        .level-card.locked:hover {
+            transform: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .level-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            animation: icon-bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes icon-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .level-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--ui-dark);
+            margin-bottom: 10px;
+        }
+
+        .level-progress {
+            font-size: 16px;
+            color: var(--ui-dark);
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .level-play-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-purple));
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Fredoka', cursive;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .level-play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .level-play-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .level-card.locked .level-play-btn {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        /* How to Play Menu */
+        #how-to-play-menu {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, var(--pastel-peach), var(--pastel-yellow), var(--pastel-pink));
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s ease;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        #how-to-play-menu.active {
+            display: flex;
+        }
+
+        .how-to-play-container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 50px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .how-to-play-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--ui-dark);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .controls-section {
+            margin-bottom: 25px;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-purple));
+            border-radius: 15px;
+            color: white;
+        }
+
+        .control-icon {
+            font-size: 32px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .control-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Back Button */
+        .back-btn {
+            margin-top: 30px;
+            background: linear-gradient(135deg, var(--pastel-purple), var(--pastel-blue));
+            padding: 15px 40px;
+        }
+
+        /* Kya decoration on menus */
+        .kya-decoration {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0.3;
+            animation: float-decoration 4s infinite ease-in-out;
+        }
+
+        @keyframes float-decoration {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(20px, -20px) rotate(10deg); }
+        }
+
+        .kya-decoration.top-left { top: 50px; left: 50px; }
+        .kya-decoration.top-right { top: 50px; right: 50px; animation-delay: 1s; }
+        .kya-decoration.bottom-left { bottom: 50px; left: 50px; animation-delay: 2s; }
+        .kya-decoration.bottom-right { bottom: 50px; right: 50px; animation-delay: 3s; }
+
+        /* Loading animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- MAIN MENU -->
+<div id="main-menu">
+    <div class="kya-decoration top-left">🐱</div>
+    <div class="kya-decoration top-right">⭐</div>
+    <div class="kya-decoration bottom-left">🌙</div>
+    <div class="kya-decoration bottom-right">✨</div>
+    
+    <h1 class="menu-title">El Viaje de Kya</h1>
+    <p class="menu-subtitle">Una aventura lunar</p>
+    
+    <div class="menu-buttons">
+        <button class="menu-btn primary" onclick="startNewGame()">
+            <span class="menu-btn-icon">▶</span>Jugar
+        </button>
+        <button class="menu-btn secondary" onclick="continueGame()">
+            <span class="menu-btn-icon">📖</span>Continuar
+        </button>
+        <button class="menu-btn" onclick="showLevelSelect()">
+            <span class="menu-btn-icon">🎯</span>Seleccionar Nivel
+        </button>
+        <button class="menu-btn" onclick="showHowToPlay()">
+            <span class="menu-btn-icon">❓</span>Cómo Jugar
+        </button>
+    </div>
+</div>
+
+<!-- PAUSE MENU -->
+<div id="pause-menu">
+    <div class="pause-container">
+        <h2 class="pause-title">⏸️ Pausa</h2>
+        <div class="pause-buttons">
+            <button class="menu-btn primary" onclick="resumeGame()">
+                <span class="menu-btn-icon">▶</span>Continuar
+            </button>
+            <button class="menu-btn" onclick="restartLevel()">
+                <span class="menu-btn-icon">🔄</span>Reiniciar Nivel
+            </button>
+            <button class="menu-btn" onclick="backToMainMenu()">
+                <span class="menu-btn-icon">🏠</span>Menú Principal
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- LEVEL SELECT MENU -->
+<div id="level-select-menu">
+    <h2 class="level-select-title">🌍 Selecciona un Mundo</h2>
+    
+    <div class="level-cards-container">
+        <!-- Level 1 Card -->
+        <div class="level-card" id="level-1-card">
+            <div class="level-icon">🌱</div>
+            <div class="level-name">Nivel 1</div>
+            <div class="level-subtitle" style="font-size: 14px; opacity: 0.7; margin-bottom: 10px;">El Jardín Lunar</div>
+            <div class="level-progress" id="level-1-progress">⭐ 0/10</div>
+            <button class="level-play-btn" onclick="loadLevel(1)">JUGAR</button>
+        </div>
+        
+        <!-- Level 2 Card -->
+        <div class="level-card" id="level-2-card">
+            <div class="level-icon">🌊</div>
+            <div class="level-name">Nivel 2</div>
+            <div class="level-subtitle" style="font-size: 14px; opacity: 0.7; margin-bottom: 10px;">Las Profundidades</div>
+            <div class="level-progress" id="level-2-progress">🐟 0/5</div>
+            <button class="level-play-btn" onclick="loadLevel(2)">JUGAR</button>
+        </div>
+        
+        <!-- Level 3 Card (Locked) -->
+        <div class="level-card locked" id="level-3-card">
+            <div class="level-icon">🔒</div>
+            <div class="level-name">Nivel 3</div>
+            <div class="level-subtitle" style="font-size: 14px; opacity: 0.7; margin-bottom: 10px;">Próximamente...</div>
+            <div class="level-progress">🔮 ???</div>
+            <button class="level-play-btn" disabled>BLOQUEADO</button>
+        </div>
+    </div>
+    
+    <button class="menu-btn back-btn" onclick="backToMainMenuFromLevelSelect()">
+        <span class="menu-btn-icon">←</span>Volver
+    </button>
+</div>
+
+<!-- HOW TO PLAY MENU -->
+<div id="how-to-play-menu">
+    <div class="how-to-play-container">
+        <h2 class="how-to-play-title">📖 Cómo Jugar</h2>
+        
+        <div class="controls-section">
+            <div class="control-item">
+                <div class="control-icon">⌨️</div>
+                <div class="control-text"><strong>WASD / Flechas:</strong> Mover a Kya</div>
+            </div>
+            
+            <div class="control-item">
+                <div class="control-icon">🐱</div>
+                <div class="control-text"><strong>ESPACIO:</strong> Maullar (revela objetos)</div>
+            </div>
+            
+            <div class="control-item">
+                <div class="control-icon">🌿</div>
+                <div class="control-text"><strong>Arbustos brillantes:</strong> Escóndete del búho</div>
+            </div>
+            
+            <div class="control-item">
+                <div class="control-icon">⭐</div>
+                <div class="control-text"><strong>Objetivo:</strong> Recolecta todos los objetos</div>
+            </div>
+            
+            <div class="control-item">
+                <div class="control-icon">⏸️</div>
+                <div class="control-text"><strong>ESC:</strong> Pausar el juego</div>
+            </div>
+        </div>
+        
+        <button class="menu-btn back-btn" onclick="backToMainMenuFromHowTo()">
+            <span class="menu-btn-icon">←</span>Volver
+        </button>
+    </div>
+</div>
+
+<div id="game-viewport">
+    <div id="alert-ui">¡CUIDADO! ALGO ACECHA...</div>
+    <div id="world">
+        <!-- Background will be dynamically set based on level -->
+        
+        <!-- PORTAL -->
+        <div id="portal">
+            <div class="portal-ring"></div>
+            <div class="portal-ring"></div>
+            <div class="portal-ring"></div>
+            <div class="portal-center"></div>
+        </div>
+        
+        <div id="player">
+            <svg class="kya-svg" viewBox="0 0 64 64" id="kya-sprite">
+                <g id="kya-tail-group">
+                    <path d="M48 45 Q58 45 58 35 Q58 28 52 28" fill="none" stroke="black" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M48 45 Q58 45 58 35 Q58 28 52 28" fill="none" stroke="var(--kya-gray)" stroke-width="5" stroke-linecap="round"/>
+                </g>
+                <rect id="kya-leg-back" x="35" y="48" width="8" height="12" rx="4" fill="var(--kya-white)" stroke="black" stroke-width="2"/>
+                <rect id="kya-leg-front" x="20" y="48" width="8" height="12" rx="4" fill="var(--kya-white)" stroke="black" stroke-width="2"/>
+                <rect x="15" y="32" width="34" height="20" rx="10" fill="var(--kya-white)" stroke="black" stroke-width="2.5"/>
+                <path d="M32 32 Q42 32 49 44 L49 32 Z" fill="var(--kya-gray)"/>
+                <g id="kya-head-group">
+                    <rect x="12" y="18" width="30" height="24" rx="11" fill="var(--kya-white)" stroke="black" stroke-width="2.5"/>
+                    <path d="M12 30 Q12 18 28 18 L28 30 Z" fill="var(--kya-gray)" stroke="black" stroke-width="1.5"/>
+                    <path d="M15 18 L8 6 L22 18 Z" fill="var(--kya-gray)" stroke="black" stroke-width="2.5"/>
+                    <path d="M38 18 L45 6 L32 18 Z" fill="var(--kya-gray)" stroke="black" stroke-width="2.5"/>
+                    <path d="M16 16 L13 10 L20 16 Z" fill="var(--kya-pink)"/>
+                    <path d="M37 16 L40 10 L33 16 Z" fill="var(--kya-pink)"/>
+                    <g id="kya-eyes-group">
+                        <rect x="19" y="30" width="3" height="3" fill="black"/>
+                        <rect x="33" y="30" width="3" height="3" fill="black"/>
+                    </g>
+                    <path d="M25 34 L28 34 L26.5 36 Z" fill="var(--kya-pink)"/>
+                </g>
+            </svg>
+        </div>
+
+        <!-- OWL Enemy (Level 1) -->
+        <div id="enemy-owl">
+            <svg viewBox="0 0 100 60" width="100%" height="100%">
+                <ellipse cx="50" cy="55" rx="30" ry="10" fill="rgba(0,0,0,0.3)" />
+                <g class="owl-wing-l"><path d="M40 30 L5 10 L15 40 Z" fill="#4e342e" stroke="black" stroke-width="2"/></g>
+                <g class="owl-wing-r"><path d="M60 30 L95 10 L85 40 Z" fill="#4e342e" stroke="black" stroke-width="2"/></g>
+                <rect x="35" y="20" width="30" height="35" rx="15" fill="#5d4037" stroke="black" stroke-width="2"/>
+                <rect x="40" y="25" width="20" height="25" rx="10" fill="#8d6e63" />
+                <rect x="32" y="5" width="36" height="25" rx="10" fill="#5d4037" stroke="black" stroke-width="2"/>
+                <circle cx="42" cy="18" r="7" fill="white" stroke="black" stroke-width="1"/>
+                <circle cx="58" cy="18" r="7" fill="white" stroke="black" stroke-width="1"/>
+                <circle cx="42" cy="18" r="3" fill="black" />
+                <circle cx="58" cy="18" r="3" fill="black" />
+                <path d="M48 22 L52 22 L50 28 Z" fill="#ffa000" />
+            </svg>
+        </div>
+
+        <!-- LIZARD Enemies (Level 2) - Will be created dynamically -->
+    </div>
+
+    <div id="hud">
+        <span id="hud-label">ESTRELLAS</span>: <span id="score">0</span> / <span id="max-score">12</span>
+    </div>
+    <div id="dialog-box"><p id="dialog-text">...</p></div>
+    <button id="gemini-button" onclick="meow()">✨</button>
+
+    <div id="mobile-controls">
+        <div></div><div class="d-btn" ontouchstart="state.keys.KeyW=true" ontouchend="state.keys.KeyW=false">↑</div><div></div>
+        <div class="d-btn" ontouchstart="state.keys.KeyA=true" ontouchend="state.keys.KeyA=false">←</div><div class="d-btn" ontouchstart="meow()">🐱</div><div class="d-btn" ontouchstart="state.keys.KeyD=true" ontouchend="state.keys.KeyD=false">→</div>
+        <div></div><div class="d-btn" ontouchstart="state.keys.KeyS=true" ontouchend="state.keys.KeyS=false">↓</div><div></div>
+    </div>
+</div>
+
+<!-- TRANSITION SCREEN -->
+<div id="transition-screen">
+    <div class="transition-text">Atravesando el portal lunar...</div>
+    <div class="transition-text">✨ 🌙 ✨</div>
+</div>
+
+<script>
+    const WORLD_SIZE = 5000;
+    const STEALTH_ROTATION_TIME = 30000;
+    
+    const KYA_BASE_SPEED = 6.5; 
+    const KYA_UNDERWATER_SPEED = 4.5;
+    const OWL_SPEED_RATIO = 0.85;
+    const PLESIOSAUR_SPEED = 4.0;
+
+    const state = { 
+        currentLevel: 1,
+        x: 2500, 
+        y: 2500, 
+        speed: KYA_BASE_SPEED, 
+        score: 0,
+        maxScore: 10,
+        keys: {}, 
+        objects: [], 
+        dialogActive: false,
+        isHiding: false, 
+        inAirBubble: false,
+        stealthTimer: Date.now(),
+        portalActive: false,
+        portalX: 0,
+        portalY: 0,
+        enteringPortal: false,
+        bubbleTrailTimer: 0,
+        waterParticles: [],
+        gameStarted: false,
+        gamePaused: false,
+        owl: {
+            x: 0, y: 0,
+            phase: 'off', 
+            timer: 0,
+            nextCheckTime: 0,
+            speed: KYA_BASE_SPEED * OWL_SPEED_RATIO, 
+            stalkDuration: 4000,
+            chaseDuration: 10000,
+            searchingPos: { x: 0, y: 0 },
+            searchTimer: 0
+        },
+        lizards: []
+    };
+
+    // ============================================
+    // LOCAL STORAGE SYSTEM
+    // ============================================
+
+    function saveProgress() {
+        const progress = {
+            level1: {
+                completed: localStorage.getItem('kya_level1_completed') === 'true',
+                stars: parseInt(localStorage.getItem('kya_level1_stars') || '0'),
+                bestStars: parseInt(localStorage.getItem('kya_level1_best') || '0')
+            },
+            level2: {
+                completed: localStorage.getItem('kya_level2_completed') === 'true',
+                fish: parseInt(localStorage.getItem('kya_level2_fish') || '0'),
+                bestFish: parseInt(localStorage.getItem('kya_level2_best') || '0')
+            },
+            currentLevel: state.currentLevel,
+            lastPlayed: new Date().toISOString()
+        };
+        
+        localStorage.setItem('kya_progress', JSON.stringify(progress));
+    }
+
+    function loadProgress() {
+        try {
+            const saved = localStorage.getItem('kya_progress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                updateLevelSelectUI(progress);
+                return progress;
+            }
+        } catch (e) {
+            console.error('Error loading progress:', e);
+        }
+        return null;
+    }
+
+    function saveCurrentLevel() {
+        if (state.currentLevel === 1) {
+            const current = parseInt(localStorage.getItem('kya_level1_stars') || '0');
+            const best = parseInt(localStorage.getItem('kya_level1_best') || '0');
+            localStorage.setItem('kya_level1_stars', state.score.toString());
+            if (state.score > best) {
+                localStorage.setItem('kya_level1_best', state.score.toString());
+            }
+            if (state.score >= 10) {
+                localStorage.setItem('kya_level1_completed', 'true');
+            }
+        } else if (state.currentLevel === 2) {
+            const current = parseInt(localStorage.getItem('kya_level2_fish') || '0');
+            const best = parseInt(localStorage.getItem('kya_level2_best') || '0');
+            localStorage.setItem('kya_level2_fish', state.score.toString());
+            if (state.score > best) {
+                localStorage.setItem('kya_level2_best', state.score.toString());
+            }
+            if (state.score >= 5) {
+                localStorage.setItem('kya_level2_completed', 'true');
+            }
+        }
+        saveProgress();
+    }
+
+    function updateLevelSelectUI(progress) {
+        if (!progress) return;
+        
+        // Update Level 1
+        const level1Progress = document.getElementById('level-1-progress');
+        if (level1Progress) {
+            level1Progress.textContent = `⭐ ${progress.level1.bestStars}/10`;
+            if (progress.level1.completed) {
+                level1Progress.textContent += ' ✓';
+            }
+        }
+        
+        // Update Level 2
+        const level2Progress = document.getElementById('level-2-progress');
+        if (level2Progress) {
+            level2Progress.textContent = `🐟 ${progress.level2.bestFish}/5`;
+            if (progress.level2.completed) {
+                level2Progress.textContent += ' ✓';
+            }
+        }
+    }
+
+    // ============================================
+    // MENU SYSTEM
+    // ============================================
+
+    function startNewGame() {
+        hideAllMenus();
+        state.gameStarted = true;
+        state.gamePaused = false;
+        state.currentLevel = 1;
+        state.score = 0;
+        state.keys = {}; // Reset all keys
+        state.x = 2500;
+        state.y = 2500;
+        state.dialogActive = false;
+        initWorld();
+        requestAnimationFrame(loop);
+    }
+
+    function continueGame() {
+        const progress = loadProgress();
+        hideAllMenus();
+        state.gameStarted = true;
+        state.gamePaused = false;
+        state.keys = {}; // Reset all keys
+        
+        if (progress && progress.currentLevel) {
+            state.currentLevel = progress.currentLevel;
+        } else {
+            state.currentLevel = 1;
+        }
+        
+        state.score = 0;
+        state.x = 2500;
+        state.y = 2500;
+        state.dialogActive = false;
+        initWorld();
+        requestAnimationFrame(loop);
+    }
+
+    function showLevelSelect() {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('level-select-menu').classList.add('active');
+        loadProgress();
+    }
+
+    function showHowToPlay() {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('how-to-play-menu').classList.add('active');
+    }
+
+    function hideAllMenus() {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('pause-menu').classList.remove('active');
+        document.getElementById('level-select-menu').classList.remove('active');
+        document.getElementById('how-to-play-menu').classList.remove('active');
+        document.getElementById('game-viewport').classList.add('active');
+    }
+
+    function showPauseMenu() {
+        state.gamePaused = true;
+        document.getElementById('pause-menu').classList.add('active');
+    }
+
+    function resumeGame() {
+        state.gamePaused = false;
+        document.getElementById('pause-menu').classList.remove('active');
+    }
+
+    function restartLevel() {
+        state.gamePaused = false;
+        document.getElementById('pause-menu').classList.remove('active');
+        state.score = 0;
+        state.keys = {}; // Reset all keys
+        state.x = 2500;
+        state.y = 2500;
+        state.portalActive = false;
+        state.enteringPortal = false;
+        state.dialogActive = false;
+        initWorld();
+    }
+
+    function backToMainMenu() {
+        state.gamePaused = false;
+        state.gameStarted = false;
+        saveCurrentLevel();
+        document.getElementById('pause-menu').classList.remove('active');
+        document.getElementById('game-viewport').classList.remove('active');
+        document.getElementById('main-menu').classList.remove('hidden');
+        clearWorld();
+    }
+
+    function backToMainMenuFromLevelSelect() {
+        document.getElementById('level-select-menu').classList.remove('active');
+        document.getElementById('main-menu').classList.remove('hidden');
+    }
+
+    function backToMainMenuFromHowTo() {
+        document.getElementById('how-to-play-menu').classList.remove('active');
+        document.getElementById('main-menu').classList.remove('hidden');
+    }
+
+    function loadLevel(levelNum) {
+        hideAllMenus();
+        state.gameStarted = true;
+        state.gamePaused = false;
+        state.currentLevel = levelNum;
+        state.score = 0;
+        state.keys = {}; // Reset all keys
+        state.x = 2500;
+        state.y = 2500;
+        state.portalActive = false;
+        state.enteringPortal = false;
+        state.dialogActive = false;
+        initWorld();
+        requestAnimationFrame(loop);
+    }
+
+    // ESC key handler for pause
+    window.addEventListener('keydown', e => {
+        // Don't register keys if game hasn't started
+        if (!state.gameStarted) {
+            if (e.key === 'Escape') e.preventDefault();
+            return;
+        }
+        
+        state.keys[e.code] = true; 
+        state.keys[e.key] = true;
+        
+        // ESC to pause/unpause
+        if (e.key === 'Escape' && state.gameStarted) {
+            e.preventDefault();
+            if (state.gamePaused) {
+                resumeGame();
+            } else {
+                showPauseMenu();
+            }
+        }
+    });
+    
+    window.addEventListener('keyup', e => {
+        if (!state.gameStarted) return;
+        state.keys[e.code] = false; 
+        state.keys[e.key] = false; 
+    });
+
+    window.addEventListener('touchstart', function detection() {
+        document.getElementById('mobile-controls').classList.add('visible');
+        window.removeEventListener('touchstart', detection);
+    }, { once: true });
+
+    // ============================================
+    // SVG GENERATORS
+    // ============================================
+
+    function createBushSVG() {
+        return `<svg viewBox="0 0 100 75" width="100" height="75"><path d="M10 60 Q5 60 5 50 Q5 35 20 30 Q25 10 50 10 Q75 10 80 30 Q95 35 95 50 Q95 60 90 60 Z" fill="black" /><path class="bush-leaves" d="M13 57 Q8 57 8 48 Q8 38 22 33 Q27 15 50 15 Q73 15 78 33 Q92 38 92 48 Q92 57 87 57 Z" fill="#2ca52c" /><path d="M25 45 Q35 35 50 35 Q65 35 75 45" fill="none" stroke="#1a5c1a" stroke-width="6" stroke-linecap="round" /></svg>`;
+    }
+
+    function createTreeSVG() {
+        return `<svg viewBox="0 0 100 120" width="120" height="150" style="image-rendering: pixelated;"><ellipse cx="50" cy="110" rx="25" ry="8" fill="rgba(0,0,0,0.2)" /><rect x="42" y="70" width="16" height="40" fill="#5d4037" stroke="#3e2723" stroke-width="2" /><circle cx="50" cy="45" r="40" fill="#2ca52c" stroke="#1a5c1a" stroke-width="4" /><circle cx="40" cy="35" r="30" fill="#44cc44" /><rect x="35" y="30" width="6" height="6" fill="#e53935" rx="1" /><rect x="60" y="45" width="6" height="6" fill="#e53935" rx="1" /><rect x="45" y="60" width="6" height="6" fill="#e53935" rx="1" /><rect x="55" y="20" width="6" height="6" fill="#e53935" rx="1" /></svg>`;
+    }
+
+    function createStarSVG() {
+        return `<svg viewBox="0 0 64 64" width="35" height="35"><path d="M32 4 L38 24 L58 32 L38 40 L32 60 L26 40 L6 32 L26 24 Z" fill="#fbbf24" stroke="white" stroke-width="2"/></svg>`;
+    }
+
+    function createKelpSVG() {
+        return `<svg viewBox="0 0 80 180" width="80" height="180" class="kelp-sway">
+            <path d="M40 180 Q30 150 35 120 Q40 90 30 60 Q35 30 40 0" 
+                  fill="none" stroke="#134e4a" stroke-width="12" stroke-linecap="round"/>
+            <path d="M40 180 Q32 150 36 120 Q40 90 32 60 Q36 30 40 0" 
+                  fill="none" stroke="#0f766e" stroke-width="8" stroke-linecap="round"/>
+            <!-- Leaves -->
+            <ellipse cx="25" cy="140" rx="12" ry="20" fill="#134e4a" opacity="0.7"/>
+            <ellipse cx="55" cy="110" rx="15" ry="25" fill="#0f766e" opacity="0.6"/>
+            <ellipse cx="20" cy="80" rx="10" ry="18" fill="#134e4a" opacity="0.7"/>
+            <ellipse cx="58" cy="50" rx="13" ry="22" fill="#0f766e" opacity="0.6"/>
+        </svg>`;
+    }
+
+    function createRockSVG() {
+        return `<svg viewBox="0 0 100 80" width="100" height="80">
+            <ellipse cx="50" cy="75" rx="40" ry="8" fill="rgba(0,0,0,0.3)"/>
+            <path d="M20 60 L10 40 L30 20 L50 10 L70 20 L90 40 L80 60 Z" 
+                  fill="#1e3a5f" stroke="#0a2540" stroke-width="3"/>
+            <path d="M25 55 L35 25 L55 15 L75 25 L85 45 L75 55 Z" 
+                  fill="#2d5a7b" opacity="0.6"/>
+            <!-- Algae patches -->
+            <circle cx="30" cy="45" r="8" fill="#134e4a" opacity="0.5"/>
+            <circle cx="65" cy="50" r="6" fill="#0f766e" opacity="0.6"/>
+        </svg>`;
+    }
+
+    function createFishSVG() {
+        return `<svg viewBox="0 0 40 30" width="40" height="30">
+            <!-- Glow effect -->
+            <ellipse cx="20" cy="15" rx="22" ry="18" fill="#fcd34d" opacity="0.3"/>
+            <!-- Body -->
+            <ellipse cx="20" cy="15" rx="15" ry="10" fill="#fcd34d" stroke="#f59e0b" stroke-width="1.5"/>
+            <!-- Eye -->
+            <circle cx="25" cy="13" r="2" fill="black"/>
+            <!-- Tail -->
+            <path d="M5 15 L0 10 L0 20 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+            <!-- Fins -->
+            <path d="M20 10 Q18 5 20 8" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M20 20 Q18 25 20 22" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>`;
+    }
+
+    function createPlesiosaurSVG() {
+        return `<svg viewBox="0 0 140 100" width="140" height="100">
+            <!-- Shadow -->
+            <ellipse cx="70" cy="90" rx="50" ry="15" fill="rgba(0,0,0,0.4)"/>
+            
+            <!-- Tail (back flipper) -->
+            <g class="plesiosaur-flipper-back">
+                <ellipse cx="25" cy="65" rx="15" ry="8" fill="#0f172a" stroke="#1e293b" stroke-width="2" transform="rotate(-30 25 65)"/>
+                <ellipse cx="25" cy="65" rx="12" ry="6" fill="#1e293b" opacity="0.8" transform="rotate(-30 25 65)"/>
+                <!-- Bioluminescent stripes on flipper -->
+                <path d="M20 60 Q25 63 30 60" stroke="#06b6d4" stroke-width="1.5" fill="none" opacity="0.6"/>
+            </g>
+            
+            <!-- Body (large oval) -->
+            <ellipse cx="60" cy="60" rx="35" ry="25" fill="#0f172a" stroke="#1e293b" stroke-width="3"/>
+            <ellipse cx="60" cy="60" rx="28" ry="20" fill="#1e293b" opacity="0.7"/>
+            
+            <!-- Bioluminescent body stripes -->
+            <path d="M40 50 Q60 48 80 50" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.7"/>
+            <path d="M35 60 Q60 58 85 60" stroke="#06b6d4" stroke-width="2.5" fill="none" opacity="0.8"/>
+            <path d="M40 70 Q60 72 80 70" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.6"/>
+            
+            <!-- Front flippers (animated) -->
+            <g class="plesiosaur-flipper-front-left">
+                <ellipse cx="50" cy="75" rx="20" ry="10" fill="#0f172a" stroke="#1e293b" stroke-width="2" transform="rotate(20 50 75)"/>
+                <ellipse cx="50" cy="75" rx="16" ry="8" fill="#64748b" opacity="0.5" transform="rotate(20 50 75)"/>
+                <path d="M45 70 Q50 73 55 70" stroke="#06b6d4" stroke-width="1.5" fill="none" opacity="0.7"/>
+            </g>
+            
+            <g class="plesiosaur-flipper-front-right">
+                <ellipse cx="70" cy="75" rx="20" ry="10" fill="#0f172a" stroke="#1e293b" stroke-width="2" transform="rotate(-20 70 75)"/>
+                <ellipse cx="70" cy="75" rx="16" ry="8" fill="#64748b" opacity="0.5" transform="rotate(-20 70 75)"/>
+                <path d="M65 70 Q70 73 75 70" stroke="#06b6d4" stroke-width="1.5" fill="none" opacity="0.7"/>
+            </g>
+            
+            <!-- Long neck (serpentine) -->
+            <path d="M85 55 Q100 45 105 30" fill="none" stroke="#0f172a" stroke-width="16" stroke-linecap="round"/>
+            <path d="M85 55 Q100 45 105 30" fill="none" stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+            <path d="M87 53 Q100 45 105 32" stroke="#06b6d4" stroke-width="1.5" fill="none" opacity="0.5"/>
+            
+            <!-- Dorsal spines (orange fire) -->
+            <g class="plesiosaur-spines">
+                <path d="M50 35 L48 28 L52 35" fill="#f97316" opacity="0.8"/>
+                <path d="M60 33 L58 25 L62 33" fill="#f97316" opacity="0.9"/>
+                <path d="M70 35 L68 27 L72 35" fill="#f97316" opacity="0.8"/>
+                <path d="M90 40 L88 33 L92 40" fill="#f97316" opacity="0.7"/>
+            </g>
+            
+            <!-- Head -->
+            <ellipse cx="108" cy="25" rx="12" ry="15" fill="#0f172a" stroke="#1e293b" stroke-width="2.5"/>
+            <ellipse cx="108" cy="25" rx="9" ry="12" fill="#1e293b"/>
+            
+            <!-- Snout -->
+            <ellipse cx="115" cy="25" rx="8" ry="6" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+            
+            <!-- Eyes (yellow default, turn red when alert) -->
+            <circle class="plesiosaur-eye-left" cx="105" cy="22" r="4" fill="#fbbf24" stroke="black" stroke-width="1"/>
+            <circle cx="105" cy="22" r="2" fill="black"/>
+            
+            <!-- Nostril -->
+            <circle cx="118" cy="23" r="1.5" fill="#64748b"/>
+            
+            <!-- Teeth (subtle) -->
+            <path d="M112 28 L113 30 M115 28 L116 30 M118 28 L119 30" stroke="white" stroke-width="1" opacity="0.6"/>
+            
+            <!-- Glow effect around creature -->
+            <ellipse cx="70" cy="60" rx="60" ry="40" fill="#06b6d4" opacity="0.05"/>
+        </svg>`;
+    }
+
+    // ============================================
+    // LEVEL INITIALIZATION
+    // ============================================
+
+    function initWorld() {
+        clearWorld();
+        
+        if (state.currentLevel === 1) {
+            initLevel1();
+        } else if (state.currentLevel === 2) {
+            initLevel2();
+        }
+    }
+
+    function clearWorld() {
+        const world = document.getElementById('world');
+        
+        // Remove all dynamic objects
+        state.objects.forEach(obj => {
+            if (obj.el && obj.el.parentNode) {
+                obj.el.remove();
+            }
+        });
+        
+        // Clear background
+        const existingBg = world.querySelector('.island, .ocean-floor');
+        if (existingBg) existingBg.remove();
+        
+        // Clear lizards
+        document.querySelectorAll('.lizard-enemy').forEach(el => el.remove());
+        
+        // Clear water particles
+        document.querySelectorAll('.water-particle').forEach(el => el.remove());
+        
+        state.objects = [];
+        state.lizards = [];
+        state.waterParticles = [];
+    }
+
+    function initLevel1() {
+        const world = document.getElementById('world');
+        const viewport = document.getElementById('game-viewport');
+        
+        viewport.classList.remove('level-2');
+        document.getElementById('player').classList.remove('swimming');
+        
+        // Add grass background
+        const island = document.createElement('div');
+        island.className = 'island';
+        world.insertBefore(island, world.firstChild);
+        
+        state.speed = KYA_BASE_SPEED;
+        state.maxScore = 10;
+        document.getElementById('hud-label').innerText = 'ESTRELLAS';
+        document.getElementById('max-score').innerText = '10';
+        
+        // Caves
+        const cavePositions = [{ x: 1000, y: 1200 }, { x: 3800, y: 4000 }];
+        cavePositions.forEach(pos => {
+            const cave = document.createElement('div');
+            cave.className = 'cave';
+            cave.style.left = pos.x + 'px';
+            cave.style.top = pos.y + 'px';
+            world.appendChild(cave);
+            state.objects.push({ x: pos.x, y: pos.y, el: cave, type: 'static' });
+        });
+        
+        // Trees
+        for(let i = 0; i < 80; i++) {
+            const tx = 200 + Math.random() * (WORLD_SIZE - 400);
+            const ty = 200 + Math.random() * (WORLD_SIZE - 400);
+            const tree = document.createElement('div');
+            tree.className = 'tree-container';
+            tree.style.left = tx + 'px';
+            tree.style.top = ty + 'px';
+            tree.innerHTML = createTreeSVG();
+            world.appendChild(tree);
+            state.objects.push({ x: tx, y: ty, el: tree, type: 'static' });
+        }
+
+        // Bushes (with stars hidden)
+        for(let j = 0; j < 150; j++) {
+            const bx = 150 + Math.random() * (WORLD_SIZE - 300);
+            const by = 150 + Math.random() * (WORLD_SIZE - 300);
+            const bush = document.createElement('div');
+            bush.className = 'bush-container';
+            bush.style.left = bx + 'px';
+            bush.style.top = by + 'px';
+            bush.innerHTML = createBushSVG();
+            world.appendChild(bush);
+            state.objects.push({ 
+                x: bx, y: by, 
+                type: 'bush', 
+                el: bush, 
+                hasStar: j < 10, 
+                found: false, 
+                isSpecial: false 
+            });
+        }
+
+        rotateSpecialBushes();
+        // Don't auto-show dialog, let player start immediately
+        // showDialog("¡Miau! Ahora sí reconozco este césped. ¡Es idéntico al de mis recuerdos!");
+        scheduleNextOwlCheck();
+    }
+
+    function initLevel2() {
+        const world = document.getElementById('world');
+        const viewport = document.getElementById('game-viewport');
+        
+        viewport.classList.add('level-2');
+        document.getElementById('player').classList.add('swimming');
+        
+        // Add ocean background
+        const ocean = document.createElement('div');
+        ocean.className = 'ocean-floor';
+        world.insertBefore(ocean, world.firstChild);
+        
+        state.speed = KYA_UNDERWATER_SPEED;
+        state.maxScore = 5;
+        document.getElementById('hud-label').innerText = 'PECES';
+        document.getElementById('max-score').innerText = '5';
+        
+        // Create ambient water particles
+        createWaterParticles();
+        
+        // Air bubble zones (4 zones where movement is normal)
+        const airZones = [
+            { x: 1200, y: 1200 },
+            { x: 3800, y: 1500 },
+            { x: 2500, y: 3500 },
+            { x: 1500, y: 4000 }
+        ];
+        
+        airZones.forEach(pos => {
+            const zone = document.createElement('div');
+            zone.className = 'air-bubble-zone';
+            zone.style.left = pos.x + 'px';
+            zone.style.top = pos.y + 'px';
+            world.appendChild(zone);
+            
+            // Add rising bubbles
+            for (let i = 0; i < 8; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble-particle';
+                bubble.style.left = (Math.random() * 200 - 100) + 'px';
+                bubble.style.top = '100px';
+                bubble.style.animationDelay = (Math.random() * 4) + 's';
+                zone.appendChild(bubble);
+            }
+            
+            state.objects.push({ 
+                x: pos.x, 
+                y: pos.y, 
+                type: 'air-zone', 
+                el: zone,
+                radius: 150
+            });
+        });
+        
+        // Rocks
+        for(let i = 0; i < 60; i++) {
+            const rx = 200 + Math.random() * (WORLD_SIZE - 400);
+            const ry = 200 + Math.random() * (WORLD_SIZE - 400);
+            const rock = document.createElement('div');
+            rock.className = 'rock-container';
+            rock.style.left = rx + 'px';
+            rock.style.top = ry + 'px';
+            rock.innerHTML = createRockSVG();
+            world.appendChild(rock);
+            state.objects.push({ x: rx, y: ry, el: rock, type: 'static' });
+        }
+        
+        // Kelp (with fish hidden)
+        for(let j = 0; j < 100; j++) {
+            const kx = 150 + Math.random() * (WORLD_SIZE - 300);
+            const ky = 150 + Math.random() * (WORLD_SIZE - 300);
+            const kelp = document.createElement('div');
+            kelp.className = 'kelp-container';
+            kelp.style.left = kx + 'px';
+            kelp.style.top = ky + 'px';
+            kelp.innerHTML = createKelpSVG();
+            world.appendChild(kelp);
+            state.objects.push({ 
+                x: kx, y: ky, 
+                type: 'kelp', 
+                el: kelp, 
+                hasFish: j < 5, 
+                found: false, 
+                isSpecial: false 
+            });
+        }
+        
+        rotateSpecialKelp();
+        
+        // Initialize 3 lizards
+        initLizards();
+        
+        // Don't auto-show dialog, let player start moving immediately
+        // showDialog("¿Dónde estoy? Todo está... sumergido. El aire huele diferente.");
+    }
+
+    function createWaterParticles() {
+        const world = document.getElementById('world');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'water-particle';
+            particle.style.left = (Math.random() * WORLD_SIZE) + 'px';
+            particle.style.top = (Math.random() * WORLD_SIZE) + 'px';
+            particle.style.animationDelay = (Math.random() * 8) + 's';
+            world.appendChild(particle);
+            state.waterParticles.push(particle);
+        }
+    }
+
+    function rotateSpecialBushes() {
+        state.objects.forEach(obj => {
+            if (obj.type === 'bush') {
+                obj.isSpecial = false;
+                obj.el.classList.remove('special-bush');
+            }
+        });
+
+        const bushes = state.objects.filter(o => o.type === 'bush');
+        const count = 10;
+        for (let i = 0; i < count; i++) {
+            const idx = Math.floor(Math.random() * bushes.length);
+            bushes[idx].isSpecial = true;
+            bushes[idx].el.classList.add('special-bush');
+        }
+        state.stealthTimer = Date.now();
+    }
+
+    function rotateSpecialKelp() {
+        state.objects.forEach(obj => {
+            if (obj.type === 'kelp') {
+                obj.isSpecial = false;
+                obj.el.classList.remove('special-kelp');
+            }
+        });
+
+        const kelps = state.objects.filter(o => o.type === 'kelp');
+        const count = 8;
+        for (let i = 0; i < count; i++) {
+            const idx = Math.floor(Math.random() * kelps.length);
+            kelps[idx].isSpecial = true;
+            kelps[idx].el.classList.add('special-kelp');
+        }
+    }
+
+    // ============================================
+    // LIZARD SYSTEM (Level 2) - NOW PLESIOSAURUS
+    // Conceptual sound: Deep underwater growl/rumble
+    // ============================================
+
+    function initLizards() {
+        const world = document.getElementById('world');
+        const zones = [
+            { patrol: [{x: 1000, y: 1000}, {x: 1500, y: 1500}, {x: 1000, y: 2000}] },
+            { patrol: [{x: 3500, y: 2500}, {x: 4000, y: 2000}, {x: 3500, y: 1500}] },
+            { patrol: [{x: 2000, y: 4000}, {x: 2500, y: 3500}, {x: 3000, y: 4000}] }
+        ];
+        
+        zones.forEach((zone, idx) => {
+            const plesiosaur = document.createElement('div');
+            plesiosaur.className = 'lizard-enemy active';
+            plesiosaur.id = `lizard-${idx}`;
+            plesiosaur.innerHTML = createPlesiosaurSVG();
+            world.appendChild(plesiosaur);
+            
+            state.lizards.push({
+                id: idx,
+                el: plesiosaur,
+                x: zone.patrol[0].x,
+                y: zone.patrol[0].y,
+                phase: 'patrol',
+                patrolPoints: zone.patrol,
+                currentPatrolIndex: 0,
+                speed: PLESIOSAUR_SPEED,
+                alertTimer: 0,
+                chaseTimer: 0,
+                detectionRange: 300,
+                chaseRange: 400,
+                chaseDuration: 8000,
+                alertDuration: 2000
+            });
+        });
+    }
+
+    function updateLizards() {
+        const now = Date.now();
+        
+        state.lizards.forEach(lizard => {
+            if (lizard.phase === 'patrol') {
+                // Move to patrol points
+                const target = lizard.patrolPoints[lizard.currentPatrolIndex];
+                const dx = target.x - lizard.x;
+                const dy = target.y - lizard.y;
+                const dist = Math.hypot(dx, dy);
+                
+                if (dist < 20) {
+                    // Reached patrol point, move to next
+                    lizard.currentPatrolIndex = (lizard.currentPatrolIndex + 1) % lizard.patrolPoints.length;
+                } else {
+                    lizard.x += (dx / dist) * lizard.speed * 0.5;
+                    lizard.y += (dy / dist) * lizard.speed * 0.5;
+                }
+                
+                // Check if player is in detection range
+                const distToPlayer = Math.hypot(state.x - lizard.x, state.y - lizard.y);
+                if (distToPlayer < lizard.detectionRange && !state.isHiding) {
+                    lizard.phase = 'alert';
+                    lizard.alertTimer = now;
+                    lizard.el.classList.add('lizard-alert');
+                    
+                    // Change eye color to red
+                    const eyeCircles = lizard.el.querySelectorAll('.plesiosaur-eye-left');
+                    eyeCircles.forEach(eye => eye.setAttribute('fill', '#ef4444'));
+                }
+            }
+            else if (lizard.phase === 'alert') {
+                // Look at player for 2 seconds
+                if (now - lizard.alertTimer > lizard.alertDuration) {
+                    lizard.phase = 'chase';
+                    lizard.chaseTimer = now;
+                    lizard.el.classList.remove('lizard-alert');
+                    
+                    if (state.lizards.indexOf(lizard) === 0) {
+                        document.getElementById('alert-ui').style.display = 'block';
+                        document.getElementById('alert-ui').innerText = '¡UNA CRIATURA ANTIGUA TE ACECHA!';
+                    }
+                }
+            }
+            else if (lizard.phase === 'chase') {
+                // If player is hiding, stop chase
+                if (state.isHiding) {
+                    lizard.phase = 'patrol';
+                    lizard.el.querySelectorAll('.plesiosaur-eye-left').forEach(eye => eye.setAttribute('fill', '#fbbf24'));
+                    document.getElementById('alert-ui').style.display = 'none';
+                    return;
+                }
+                
+                // Chase player
+                const dx = state.x - lizard.x;
+                const dy = state.y - lizard.y;
+                const dist = Math.hypot(dx, dy);
+                
+                lizard.x += (dx / dist) * lizard.speed;
+                lizard.y += (dy / dist) * lizard.speed;
+                
+                // Check if caught player
+                if (dist < 50) {
+                    disperseFish();
+                    lizard.phase = 'patrol';
+                    lizard.el.querySelectorAll('.plesiosaur-eye-left').forEach(eye => eye.setAttribute('fill', '#fbbf24'));
+                    document.getElementById('alert-ui').style.display = 'none';
+                }
+                
+                // Timeout chase
+                if (now - lizard.chaseTimer > lizard.chaseDuration || dist > lizard.chaseRange) {
+                    lizard.phase = 'patrol';
+                    lizard.el.querySelectorAll('.plesiosaur-eye-left').forEach(eye => eye.setAttribute('fill', '#fbbf24'));
+                    document.getElementById('alert-ui').style.display = 'none';
+                }
+            }
+            
+            // Update position
+            lizard.el.style.left = lizard.x + 'px';
+            lizard.el.style.top = lizard.y + 'px';
+            lizard.el.style.transform = `translate(-50%, -50%) scaleX(${state.x > lizard.x ? -1 : 1})`;
+            lizard.el.style.zIndex = Math.floor(lizard.y);
+        });
+    }
+
+    function disperseFish() {
+        // Remove all collected fish and redistribute them
+        const fishObjects = state.objects.filter(obj => obj.type === 'fish' && obj.active);
+        const kelpObjects = state.objects.filter(obj => obj.type === 'kelp');
+        
+        fishObjects.forEach(fish => {
+            fish.active = false;
+            fish.el.remove();
+        });
+        
+        // Remove fish from objects array
+        state.objects = state.objects.filter(obj => obj.type !== 'fish' || !obj.active);
+        
+        // Reset kelp found status
+        kelpObjects.forEach(kelp => {
+            kelp.found = false;
+        });
+        
+        // Reset score
+        state.score = 0;
+        document.getElementById('score').innerText = '0';
+        
+        showDialog("¡Oh no! El lagarto me asustó y los peces escaparon...");
+    }
+
+    // ============================================
+    // OWL SYSTEM (Level 1)
+    // ============================================
+
+    function scheduleNextOwlCheck() {
+        const delay = 35000 + Math.random() * 25000;
+        state.owl.nextCheckTime = Date.now() + delay;
+    }
+
+    function trySpawnOwl() {
+        if (state.owl.phase !== 'off' || state.portalActive) return;
+        let shouldSpawn = state.score <= 5 ? true : (Math.random() * 100) < Math.min(90, 40 + (state.score - 5) * 10);
+        if (shouldSpawn) startOwlCycle(); 
+        else scheduleNextOwlCheck();
+    }
+
+    function startOwlCycle() {
+        state.owl.phase = 'stalking';
+        state.owl.timer = Date.now();
+        const side = Math.floor(Math.random() * 4);
+        switch(side) {
+            case 0: state.owl.x = 100; state.owl.y = Math.random() * WORLD_SIZE; break;
+            case 1: state.owl.x = WORLD_SIZE - 100; state.owl.y = Math.random() * WORLD_SIZE; break;
+            case 2: state.owl.x = Math.random() * WORLD_SIZE; state.owl.y = 100; break;
+            case 3: state.owl.x = Math.random() * WORLD_SIZE; state.owl.y = WORLD_SIZE - 100; break;
+        }
+        const owlEl = document.getElementById('enemy-owl');
+        owlEl.style.display = 'block';
+        owlEl.style.opacity = '0.5';
+        document.getElementById('alert-ui').style.display = 'block';
+        document.getElementById('alert-ui').innerText = "¡HOO-HOO! UNA SOMBRA SE ACERCA...";
+    }
+
+    function updateOwl() {
+        const now = Date.now();
+        if (state.owl.phase === 'off') { 
+            if (now >= state.owl.nextCheckTime) trySpawnOwl(); 
+            return; 
+        }
+        
+        const owlEl = document.getElementById('enemy-owl');
+        const alertEl = document.getElementById('alert-ui');
+
+        if (state.owl.phase === 'stalking') {
+            const dx = state.x - state.owl.x;
+            const dy = state.y - state.owl.y;
+            const dist = Math.hypot(dx, dy);
+            
+            if(dist > 300) { 
+                state.owl.x += (dx / dist) * (state.owl.speed * 0.5); 
+                state.owl.y += (dy / dist) * (state.owl.speed * 0.5); 
+            }
+            
+            if (now - state.owl.timer > state.owl.stalkDuration) {
+                state.owl.phase = 'chasing'; 
+                state.owl.timer = now;
+                owlEl.style.opacity = '1'; 
+                alertEl.innerText = "¡LA LECHUZA ATACA!";
+            }
+        } 
+        else if (state.owl.phase === 'chasing') {
+            if (state.isHiding) {
+                state.owl.phase = 'searching';
+                state.owl.searchTimer = now;
+                state.owl.searchingPos = { x: state.owl.x, y: state.owl.y };
+                alertEl.innerText = "¿DÓNDE SE HA METIDO...?";
+                return;
+            }
+
+            const dx = state.x - state.owl.x;
+            const dy = state.y - state.owl.y;
+            const dist = Math.hypot(dx, dy);
+            
+            state.owl.x += (dx / dist) * state.owl.speed; 
+            state.owl.y += (dy / dist) * state.owl.speed;
+            
+            if (dist < 40) penalizePlayer();
+            if (now - state.owl.timer > state.owl.chaseDuration) {
+                retreatOwl("¡Has logrado cansar a la lechuza!");
+            }
+        }
+        else if (state.owl.phase === 'searching') {
+            if (!state.isHiding) {
+                state.owl.phase = 'chasing';
+                alertEl.innerText = "¡TE HE VISTO!";
+                return;
+            }
+            state.owl.x += Math.cos(now / 300) * 3;
+            state.owl.y += Math.sin(now / 300) * 3;
+            if (now - state.owl.searchTimer > 4000) {
+                retreatOwl("La lechuza se ha confundido y se marcha.");
+            }
+        }
+        else if (state.owl.phase === 'retreating') {
+            state.owl.y -= 15; 
+            state.owl.x += 8;
+            if (state.owl.y < state.y - 800) { 
+                state.owl.phase = 'off'; 
+                owlEl.style.display = 'none'; 
+                scheduleNextOwlCheck(); 
+            }
+        }
+        
+        owlEl.style.left = state.owl.x + 'px'; 
+        owlEl.style.top = state.owl.y + 'px';
+        owlEl.style.transform = `translate(-50%, -50%) scaleX(${state.x > state.owl.x ? -1 : 1})`;
+        owlEl.style.zIndex = 4999;
+    }
+
+    function penalizePlayer() {
+        if (state.owl.phase !== 'chasing') return;
+        const loss = Math.min(state.score, 3);
+        state.score -= loss;
+        document.getElementById('score').innerText = state.score;
+        if (loss > 0) respawnStars(loss);
+        retreatOwl("¡Miau! Me han robado estrellas...");
+    }
+
+    function retreatOwl(msg) {
+        state.owl.phase = 'retreating';
+        document.getElementById('alert-ui').style.display = 'none';
+        showDialog(msg);
+    }
+
+    // ============================================
+    // MEOW & COLLECTIBLES
+    // ============================================
+
+    function meow() {
+        if (state.enteringPortal) return;
+        if (state.dialogActive) { 
+            closeDialog(); 
+            return; 
+        }
+        
+        const m = document.createElement('div');
+        m.style.position = 'absolute';
+        m.style.left = state.x + 'px';
+        m.style.top = state.y + 'px';
+        m.style.border = '3px solid white';
+        m.style.borderRadius = '50%';
+        m.style.transform = 'translate(-50%, -50%)';
+        m.style.zIndex = Math.floor(state.y);
+        
+        // Different meow effect based on level
+        if (state.currentLevel === 1) {
+            m.animate([
+                { width: '0px', height: '0px', opacity: 1 }, 
+                { width: '400px', height: '400px', opacity: 0 }
+            ], { duration: 600 });
+        } else {
+            // Bubble effect for level 2
+            m.style.background = 'radial-gradient(circle, rgba(255,255,255,0.3), transparent)';
+            m.animate([
+                { width: '0px', height: '0px', opacity: 1 }, 
+                { width: '300px', height: '300px', opacity: 0 }
+            ], { duration: 800 });
+        }
+        
+        document.getElementById('world').appendChild(m);
+        setTimeout(() => m.remove(), state.currentLevel === 1 ? 600 : 800);
+
+        // Reveal hidden collectibles
+        if (state.currentLevel === 1) {
+            state.objects.forEach(obj => {
+                if (obj.type === 'bush' && !obj.found) {
+                    const d = Math.hypot(state.x - obj.x, state.y - obj.y);
+                    if (d < 140 && obj.hasStar) {
+                        obj.found = true;
+                        spawnStarAt(obj.x, obj.y);
+                    }
+                }
+            });
+        } else {
+            state.objects.forEach(obj => {
+                if (obj.type === 'kelp' && !obj.found) {
+                    const d = Math.hypot(state.x - obj.x, state.y - obj.y);
+                    if (d < 140 && obj.hasFish) {
+                        obj.found = true;
+                        spawnFishAt(obj.x, obj.y);
+                    }
+                }
+            });
+        }
+    }
+
+    function spawnStarAt(x, y) {
+        const star = document.createElement('div');
+        star.className = 'star-item';
+        star.style.left = x + 'px';
+        star.style.top = y + 'px';
+        star.innerHTML = createStarSVG();
+        document.getElementById('world').appendChild(star);
+        state.objects.push({x: x, y: y, type:'star', el: star, active: true});
+    }
+
+    function spawnFishAt(x, y) {
+        const fish = document.createElement('div');
+        fish.className = 'fish-item fish-swimming';
+        fish.style.left = x + 'px';
+        fish.style.top = y + 'px';
+        fish.innerHTML = createFishSVG();
+        document.getElementById('world').appendChild(fish);
+        state.objects.push({x: x, y: y, type:'fish', el: fish, active: true});
+    }
+
+    function respawnStars(amount) {
+        for(let i = 0; i < amount; i++) {
+            let rx = 200 + Math.random() * (WORLD_SIZE - 400);
+            let ry = 200 + Math.random() * (WORLD_SIZE - 400);
+            spawnStarAt(rx, ry);
+        }
+    }
+
+    // ============================================
+    // PORTAL & TRANSITIONS
+    // ============================================
+
+    function spawnPortal() {
+        state.portalActive = true;
+        state.portalX = 2500;
+        state.portalY = 2500;
+        
+        const portal = document.getElementById('portal');
+        portal.style.left = state.portalX + 'px';
+        portal.style.top = state.portalY + 'px';
+        portal.classList.add('active');
+        
+        // Stop enemies
+        if (state.currentLevel === 1 && state.owl.phase !== 'off') {
+            retreatOwl("La luz del portal asusta a la lechuza...");
+        }
+        
+        const msg = state.currentLevel === 1 
+            ? "¡El portal lunar ha aparecido! Acércate para entrar al siguiente mundo..."
+            : "Otro portal... cada uno me lleva más lejos... o más cerca. No lo sé. Pero debo seguir.";
+        
+        showDialog(msg);
+    }
+
+    function enterPortal() {
+        if (state.enteringPortal) return;
+        
+        state.enteringPortal = true;
+        const player = document.getElementById('player');
+        player.classList.add('entering-portal');
+        
+        setTimeout(() => {
+            showTransitionScreen();
+        }, 2000);
+    }
+
+    function showTransitionScreen() {
+        const transitionScreen = document.getElementById('transition-screen');
+        const texts = transitionScreen.querySelectorAll('.transition-text');
+        
+        if (state.currentLevel === 1) {
+            texts[0].innerText = "Las estrellas del primer mundo se desvanecen...";
+            texts[1].innerText = "Kya cae más profundo... más lejos de la Luna.";
+        } else {
+            texts[0].innerText = "Atravesando las profundidades...";
+            texts[1].innerText = "✨ 🌊 ✨";
+        }
+        
+        transitionScreen.classList.add('active');
+        
+        setTimeout(() => {
+            loadNextLevel();
+        }, 3000);
+    }
+
+    function loadNextLevel() {
+        state.currentLevel++;
+        state.score = 0;
+        state.portalActive = false;
+        state.enteringPortal = false;
+        
+        document.getElementById('transition-screen').classList.remove('active');
+        document.getElementById('player').classList.remove('entering-portal');
+        document.getElementById('portal').classList.remove('active');
+        
+        state.x = 2500;
+        state.y = 2500;
+        document.getElementById('score').innerText = '0';
+        
+        initWorld();
+    }
+
+    // ============================================
+    // UI & DIALOGS
+    // ============================================
+
+    function showDialog(t) { 
+        state.dialogActive = true; 
+        document.getElementById('dialog-text').innerText = t; 
+        document.getElementById('dialog-box').style.display = 'block'; 
+    }
+    
+    function closeDialog() { 
+        state.dialogActive = false; 
+        document.getElementById('dialog-box').style.display = 'none'; 
+    }
+
+    function updateDepthSorting() {
+        const playerEl = document.getElementById('player');
+        playerEl.style.left = state.x + 'px';
+        playerEl.style.top = state.y + 'px';
+
+        state.objects.forEach(obj => {
+            if (obj.active === false) return;
+            obj.el.style.zIndex = Math.floor(obj.y);
+            
+            if (state.currentLevel === 1) {
+                if (state.isHiding && obj.type === 'bush' && obj.isSpecial && 
+                    Math.hypot(state.x - obj.x, state.y - obj.y) < 40) {
+                    obj.el.style.zIndex = Math.floor(obj.y) + 5; 
+                }
+            } else {
+                if (state.isHiding && obj.type === 'kelp' && obj.isSpecial && 
+                    Math.hypot(state.x - obj.x, state.y - obj.y) < 50) {
+                    obj.el.style.zIndex = Math.floor(obj.y) + 5; 
+                }
+            }
+        });
+
+        playerEl.style.zIndex = state.isHiding ? Math.floor(state.y) - 1 : Math.floor(state.y);
+        
+        if (state.isHiding) playerEl.classList.add('hiding');
+        else playerEl.classList.remove('hiding');
+    }
+
+    // ============================================
+    // MAIN GAME LOOP
+    // ============================================
+
+    function loop() {
+        if (!state.gameStarted) return;
+        
+        const now = Date.now();
+        
+        // Don't update game if paused
+        if (state.gamePaused) {
+            requestAnimationFrame(loop);
+            return;
+        }
+        
+        // Auto-save progress periodically
+        if (now % 10000 < 16) { // Every ~10 seconds
+            saveCurrentLevel();
+        }
+        
+        // Rotate special hiding spots periodically (level 1 only)
+        if (state.currentLevel === 1 && !state.portalActive && 
+            now - state.stealthTimer >= STEALTH_ROTATION_TIME) {
+            rotateSpecialBushes();
+        }
+
+        if (!state.dialogActive && !state.enteringPortal) {
+            let dx = 0, dy = 0;
+            if (state.keys['KeyW'] || state.keys['ArrowUp'] || state.keys['w']) dy = -1;
+            if (state.keys['KeyS'] || state.keys['ArrowDown'] || state.keys['s']) dy = 1;
+            if (state.keys['KeyA'] || state.keys['ArrowLeft'] || state.keys['a']) dx = -1;
+            if (state.keys['KeyD'] || state.keys['ArrowRight'] || state.keys['d']) dx = 1;
+
+            const moving = dx !== 0 || dy !== 0;
+
+            // Check if in air bubble zone (level 2)
+            if (state.currentLevel === 2) {
+                state.inAirBubble = false;
+                state.objects.forEach(obj => {
+                    if (obj.type === 'air-zone') {
+                        const dist = Math.hypot(state.x - obj.x, state.y - obj.y);
+                        if (dist < obj.radius) {
+                            state.inAirBubble = true;
+                        }
+                    }
+                });
+                
+                // Adjust speed based on air bubble
+                state.speed = state.inAirBubble ? KYA_BASE_SPEED : KYA_UNDERWATER_SPEED;
+                
+                // Create bubble trail when moving underwater
+                if (moving && !state.inAirBubble && now - state.bubbleTrailTimer > 150) {
+                    createBubbleTrail();
+                    state.bubbleTrailTimer = now;
+                }
+            }
+
+            if (moving) {
+                const l = Math.hypot(dx, dy);
+                state.x += (dx/l) * state.speed;
+                state.y += (dy/l) * state.speed;
+                state.x = Math.max(60, Math.min(WORLD_SIZE - 60, state.x));
+                state.y = Math.max(60, Math.min(WORLD_SIZE - 60, state.y));
+                
+                document.getElementById('player').classList.add('walking');
+                document.getElementById('kya-sprite').style.transform = `scaleX(${dx > 0 ? -1 : 1})`;
+                state.isHiding = false; 
+            } else {
+                document.getElementById('player').classList.remove('walking');
+                
+                // Check hiding spots
+                let inHidingSpot = false;
+                state.objects.forEach(obj => {
+                    if (state.currentLevel === 1 && obj.type === 'bush' && obj.isSpecial) {
+                        const dist = Math.hypot(state.x - obj.x, state.y - obj.y);
+                        if (dist < 45) inHidingSpot = true;
+                    } else if (state.currentLevel === 2 && obj.type === 'kelp' && obj.isSpecial) {
+                        const dist = Math.hypot(state.x - obj.x, state.y - obj.y);
+                        if (dist < 50) inHidingSpot = true;
+                    }
+                });
+                state.isHiding = inHidingSpot;
+            }
+
+            // Collect items
+            state.objects.forEach(obj => {
+                if (obj.type === 'star' && obj.active && 
+                    Math.hypot(state.x - obj.x, state.y - obj.y) < 50) {
+                    obj.active = false;
+                    obj.el.remove();
+                    state.score++;
+                    document.getElementById('score').innerText = state.score;
+                    saveCurrentLevel(); // Auto-save on collection
+                    
+                    if(state.score >= state.maxScore && !state.portalActive) {
+                        spawnPortal();
+                    }
+                } else if (obj.type === 'fish' && obj.active && 
+                          Math.hypot(state.x - obj.x, state.y - obj.y) < 50) {
+                    obj.active = false;
+                    obj.el.remove();
+                    state.score++;
+                    document.getElementById('score').innerText = state.score;
+                    saveCurrentLevel(); // Auto-save on collection
+                    
+                    // First fish dialogue
+                    if (state.score === 1) {
+                        showDialog("¿Un pez? No estrellas... solo... comida. ¿Tan lejos de casa estoy?");
+                    } else if (state.score === 3) {
+                        showDialog("Cada pez me recuerda que estoy viva. Aunque no sepa dónde.");
+                    } else if(state.score >= state.maxScore && !state.portalActive) {
+                        showDialog("Esto no es la Tierra... pero aún no me rindo.");
+                        setTimeout(() => spawnPortal(), 2000);
+                    }
+                }
+            });
+
+            // Enter portal
+            if (state.portalActive && !state.enteringPortal) {
+                const distToPortal = Math.hypot(state.x - state.portalX, state.y - state.portalY);
+                if (distToPortal < 100) {
+                    enterPortal();
+                }
+            }
+
+            if (state.keys['Space'] || state.keys[' ']) {
+                meow();
+                state.keys['Space'] = false; 
+            }
+
+            // Update enemies
+            if (state.currentLevel === 1) {
+                updateOwl();
+            } else {
+                updateLizards();
+            }
+        }
+        
+        updateDepthSorting();
+
+        const sx = window.innerWidth/2, sy = window.innerHeight/2;
+        document.getElementById('world').style.transform = 
+            `translate(${sx - state.x}px, ${sy - state.y}px)`;
+        
+        requestAnimationFrame(loop);
+    }
+
+    function createBubbleTrail() {
+        const bubble = document.createElement('div');
+        bubble.className = 'kya-bubble';
+        bubble.style.left = state.x + 'px';
+        bubble.style.top = state.y + 'px';
+        bubble.style.zIndex = Math.floor(state.y) - 1;
+        document.getElementById('world').appendChild(bubble);
+        setTimeout(() => bubble.remove(), 1000);
+    }
+
+    // ============================================
+    // INITIALIZE ON PAGE LOAD
+    // ============================================
+
+    // Load saved progress on startup
+    loadProgress();
+
+    // Show main menu on load
+    document.getElementById('main-menu').classList.remove('hidden');
+
+</script>
+</body>
+</html>
