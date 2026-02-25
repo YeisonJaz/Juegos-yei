@@ -936,6 +936,9 @@
             <button class="menu-btn" onclick="restartLevel()">
                 <span class="menu-btn-icon">🔄</span>Reiniciar Nivel
             </button>
+            <button class="menu-btn" onclick="goToLevelSelectFromPause()">
+                <span class="menu-btn-icon">🎯</span>Cambiar Nivel
+            </button>
             <button class="menu-btn" onclick="backToMainMenu()">
                 <span class="menu-btn-icon">🏠</span>Menú Principal
             </button>
@@ -1106,6 +1109,9 @@
     const OWL_SPEED_RATIO = 0.85;
     const PLESIOSAUR_SPEED = 4.0;
 
+    // Game loop ID to prevent multiple loops
+    let gameLoopId = null;
+
     const state = { 
         currentLevel: 1,
         x: 2500, 
@@ -1230,6 +1236,9 @@
     // ============================================
 
     function startNewGame() {
+        // Cancel any existing loop
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        
         hideAllMenus();
         state.gameStarted = true;
         state.gamePaused = false;
@@ -1239,11 +1248,22 @@
         state.x = 2500;
         state.y = 2500;
         state.dialogActive = false;
+        
+        // Reset player position in DOM immediately
+        const player = document.getElementById('player');
+        player.style.left = '2500px';
+        player.style.top = '2500px';
+        
         initWorld();
-        requestAnimationFrame(loop);
+        
+        // Start new loop
+        gameLoopId = requestAnimationFrame(loop);
     }
 
     function continueGame() {
+        // Cancel any existing loop
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        
         const progress = loadProgress();
         hideAllMenus();
         state.gameStarted = true;
@@ -1260,11 +1280,23 @@
         state.x = 2500;
         state.y = 2500;
         state.dialogActive = false;
+        
+        // Reset player position in DOM immediately
+        const player = document.getElementById('player');
+        player.style.left = '2500px';
+        player.style.top = '2500px';
+        
         initWorld();
-        requestAnimationFrame(loop);
+        
+        // Start new loop
+        gameLoopId = requestAnimationFrame(loop);
     }
 
     function showLevelSelect() {
+        // Close pause menu if it was open
+        document.getElementById('pause-menu').classList.remove('active');
+        state.gamePaused = false; // Unpause game
+        
         document.getElementById('main-menu').classList.add('hidden');
         document.getElementById('level-select-menu').classList.add('active');
         loadProgress();
@@ -1318,7 +1350,12 @@
 
     function backToMainMenuFromLevelSelect() {
         document.getElementById('level-select-menu').classList.remove('active');
+        document.getElementById('game-viewport').classList.remove('active');
         document.getElementById('main-menu').classList.remove('hidden');
+        
+        // Reset game state
+        state.gameStarted = false;
+        state.gamePaused = false;
     }
 
     function backToMainMenuFromHowTo() {
@@ -1326,7 +1363,22 @@
         document.getElementById('main-menu').classList.remove('hidden');
     }
 
+    function goToLevelSelectFromPause() {
+        // Close pause and game
+        state.gamePaused = false;
+        state.gameStarted = false;
+        document.getElementById('pause-menu').classList.remove('active');
+        document.getElementById('game-viewport').classList.remove('active');
+        
+        // Show level selector
+        document.getElementById('level-select-menu').classList.add('active');
+        loadProgress();
+    }
+
     function loadLevel(levelNum) {
+        // Cancel any existing loop
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        
         hideAllMenus();
         state.gameStarted = true;
         state.gamePaused = false;
@@ -1338,8 +1390,16 @@
         state.portalActive = false;
         state.enteringPortal = false;
         state.dialogActive = false;
+        
+        // Reset player position in DOM immediately
+        const player = document.getElementById('player');
+        player.style.left = '2500px';
+        player.style.top = '2500px';
+        
         initWorld();
-        requestAnimationFrame(loop);
+        
+        // Start new loop
+        gameLoopId = requestAnimationFrame(loop);
     }
 
     // ESC key handler for pause
@@ -1509,7 +1569,7 @@
     // ============================================
 
     function initWorld() {
-        clearWorld();
+        clearWorld(); // Always clear before initializing
         
         if (state.currentLevel === 1) {
             initLevel1();
@@ -1520,6 +1580,14 @@
 
     function clearWorld() {
         const world = document.getElementById('world');
+        const viewport = document.getElementById('game-viewport');
+        
+        // Remove level-specific classes
+        viewport.classList.remove('level-2');
+        document.getElementById('player').classList.remove('swimming');
+        
+        // IMPORTANT: Reset world transform
+        world.style.transform = 'translate(0px, 0px)';
         
         // Remove all dynamic objects
         state.objects.forEach(obj => {
@@ -1538,6 +1606,11 @@
         // Clear water particles
         document.querySelectorAll('.water-particle').forEach(el => el.remove());
         
+        // Reset owl
+        document.getElementById('enemy-owl').style.display = 'none';
+        state.owl.phase = 'off';
+        
+        // Clear arrays
         state.objects = [];
         state.lizards = [];
         state.waterParticles = [];
@@ -2361,7 +2434,8 @@
 
             if (state.keys['Space'] || state.keys[' ']) {
                 meow();
-                state.keys['Space'] = false; 
+                state.keys['Space'] = false;
+                state.keys[' '] = false; // Reset both versions
             }
 
             // Update enemies
@@ -2378,7 +2452,7 @@
         document.getElementById('world').style.transform = 
             `translate(${sx - state.x}px, ${sy - state.y}px)`;
         
-        requestAnimationFrame(loop);
+        gameLoopId = requestAnimationFrame(loop);
     }
 
     function createBubbleTrail() {
@@ -2400,6 +2474,9 @@
 
     // Show main menu on load
     document.getElementById('main-menu').classList.remove('hidden');
+
+    // Start the game loop ONCE and save the ID
+    gameLoopId = requestAnimationFrame(loop);
 
 </script>
 </body>
